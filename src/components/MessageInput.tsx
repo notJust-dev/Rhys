@@ -5,9 +5,11 @@ import type { LayoutChangeEvent } from "react-native";
 export function MessageInput({
   onSend,
   onLayout,
+  isLoading,
 }: {
   onSend: (message: string) => void;
   onLayout?: (e: LayoutChangeEvent) => void;
+  isLoading?: boolean;
 }) {
   const [text, setText] = useState("");
 
@@ -34,8 +36,8 @@ export function MessageInput({
       <Pressable
         className="h-9 w-9 items-center justify-center rounded-full bg-black"
         onPress={handleSend}
-        disabled={!text.trim()}
-        style={{ opacity: text.trim() ? 1 : 0.4 }}
+        disabled={!text.trim() || isLoading}
+        style={{ opacity: text.trim() && !isLoading ? 1 : 0.4 }}
       >
         <Text className="text-white text-base font-bold">↑</Text>
       </Pressable>

@@ -1,4 +1,6 @@
+import { MessageBubble } from "@/components/MessageBubble";
 import { MessageInput } from "@/components/MessageInput";
+import { useChat } from "@/hooks/useChat";
 import { SafeAreaView, Text, View } from "@/tw";
 import { useCallback } from "react";
 import type { LayoutChangeEvent } from "react-native";
@@ -16,6 +18,7 @@ const MARGIN = 8;
 export default function Index() {
   const { bottom } = useSafeAreaInsets();
   const extraContentPadding = useSharedValue(0);
+  const { messages, isLoading, sendMessage } = useChat();
 
   const onInputLayout = useCallback(
     (e: LayoutChangeEvent) => {
@@ -39,17 +42,26 @@ export default function Index() {
           offset={bottom - MARGIN}
           extraContentPadding={extraContentPadding}
         >
-          <View className="flex-1 items-center justify-center py-20">
-            <Text className="text-gray-400 text-base">
-              How can I help you today?
-            </Text>
-          </View>
+          {messages.length === 0 ? (
+            <View className="flex-1 items-center justify-center py-20">
+              <Text className="text-gray-400 text-base">
+                How can I help you today?
+              </Text>
+            </View>
+          ) : (
+            <View className="py-4 gap-1">
+              {messages.map((message) => (
+                <MessageBubble key={message.id} message={message} />
+              ))}
+            </View>
+          )}
         </KeyboardChatScrollView>
 
         <KeyboardStickyView offset={{ opened: bottom - MARGIN }}>
           <MessageInput
-            onSend={(message) => console.log(message)}
+            onSend={sendMessage}
             onLayout={onInputLayout}
+            isLoading={isLoading}
           />
         </KeyboardStickyView>
       </KeyboardGestureArea>
