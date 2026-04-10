@@ -6,9 +6,11 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function RootLayout() {
   return (
-    <SafeAreaProvider >
+    <SafeAreaProvider>
       <KeyboardProvider>
-        <Stack />
+        <Stack>
+          <Stack.Screen name="(home)" options={{ headerShown: false }} />
+        </Stack>
       </KeyboardProvider>
     </SafeAreaProvider>
   );
