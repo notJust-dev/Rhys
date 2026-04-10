@@ -1,17 +1,28 @@
 import "../global.css";
 
+import { Providers } from "@/providers";
+import { useAuth } from "@/providers/Supabase/AuthProvider";
 import { Stack } from "expo-router";
-import { KeyboardProvider } from "react-native-keyboard-controller";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+export function RootStack() {
+  const { isAuthenticated } = useAuth();
+
+  return (
+    <Stack>
+      <Stack.Protected guard={!isAuthenticated}>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+      </Stack.Protected>
+
+      <Stack.Protected guard={isAuthenticated}>
+        <Stack.Screen name="(home)" options={{ headerShown: false }} />
+      </Stack.Protected>
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
   return (
-    <SafeAreaProvider>
-      <KeyboardProvider>
-        <Stack>
-          <Stack.Screen name="(home)" options={{ headerShown: false }} />
-        </Stack>
-      </KeyboardProvider>
-    </SafeAreaProvider>
+    <Providers>
+      <RootStack />
+    </Providers>
   );
 }
