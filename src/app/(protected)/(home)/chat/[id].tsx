@@ -2,6 +2,7 @@ import { MessageBubble } from "@/components/MessageBubble";
 import { MessageInput } from "@/components/MessageInput";
 import { useChat } from "@/hooks/useChat";
 import { SafeAreaView, Text, View } from "@/tw";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { useCallback } from "react";
 import type { LayoutChangeEvent } from "react-native";
 import {
@@ -15,10 +16,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const MIN_INPUT_HEIGHT = 36;
 const MARGIN = 8;
 
-export default function Index() {
+export default function ChatScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
   const { bottom } = useSafeAreaInsets();
   const extraContentPadding = useSharedValue(0);
-  const { messages, isLoading, sendMessage } = useChat();
+  const { title, messages, isLoading, sendMessage } = useChat(id!);
 
   const onInputLayout = useCallback(
     (e: LayoutChangeEvent) => {
@@ -32,6 +34,8 @@ export default function Index() {
 
   return (
     <SafeAreaView edges={['bottom']} className="flex-1 bg-white">
+      <Stack.Screen options={{ title }} />
+
       <KeyboardGestureArea
         interpolator="ios"
         textInputNativeID="chat-input"

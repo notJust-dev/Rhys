@@ -1,16 +1,25 @@
 import { randomUUID } from "expo-crypto";
 import { supabase } from "@/providers/Supabase/client";
-import { useCreateChat } from "@/services/chats";
+import { useChatById, useCreateChat } from "@/services/chats";
 import { useChatMessages, useSaveMessage } from "@/services/messages";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-export function useChat() {
+export function useChat(id: string) {
+  const isNew = id === "new";
+  const [createdChatId, setCreatedChatId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const chatIdRef = useRef<string | null>(null);
+
+  // Reset created chat id when navigating to a different chat
+  useEffect(() => {
+    setCreatedChatId(null);
+  }, [id]);
+
+  const chatId = isNew ? createdChatId : id;
   const queryClient = useQueryClient();
 
-  const { data: messages = [] } = useChatMessages(chatIdRef.current);
+  const { data: chat } = useChatById(chatId);
+  const { data: messages = [] } = useChatMessages(chatId);
   const createChat = useCreateChat();
   const saveMessage = useSaveMessage();
 
@@ -20,15 +29,15 @@ export function useChat() {
 
       try {
         // Create chat on first message
-        if (!chatIdRef.current) {
-          const chat = await createChat.mutateAsync(text);
-          chatIdRef.current = chat.id;
+        let currentChatId = chatId;
+        if (!currentChatId) {
+          const newChat = await createChat.mutateAsync(text);
+          currentChatId = newChat.id;
+          setCreatedChatId(currentChatId);
         }
 
-        const chatId = chatIdRef.current;
-
         // Save user message and wait for cache update
-        await saveMessage.mutateAsync({ chatId, role: "user", content: text });
+        await saveMessage.mutateAsync({ chatId: currentChatId, role: "user", content: text });
 
         const chatMessages = [
           ...messages.map((m) => ({ role: m.role, content: m.content })),
@@ -46,19 +55,19 @@ export function useChat() {
 
         // Save assistant message and wait for cache update
         await saveMessage.mutateAsync({
-          chatId,
+          chatId: currentChatId,
           role: "assistant",
           content: assistantContent,
         });
       } catch {
         // Show error as a temporary optimistic update
         queryClient.setQueryData(
-          ["messages", chatIdRef.current],
+          ["messages", chatId],
           (old: typeof messages) => [
             ...(old ?? []),
             {
               id: randomUUID(),
-              chat_id: chatIdRef.current!,
+              chat_id: chatId!,
               role: "assistant" as const,
               content: "Something went wrong. Please try again.",
               created_at: new Date().toISOString(),
@@ -72,5 +81,7 @@ export function useChat() {
     [messages, createChat, saveMessage, queryClient],
   );
 
-  return { messages, isLoading, sendMessage };
+  const title = chat?.title ?? "New Chat";
+
+  return { title, messages, isLoading, sendMessage };
 }

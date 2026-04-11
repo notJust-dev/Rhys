@@ -20,6 +20,22 @@ export function useChats() {
   });
 }
 
+export function useChatById(id: string | null) {
+  return useQuery({
+    queryKey: ["chat", id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("chats")
+        .select("*")
+        .eq("id", id!)
+        .single()
+        .throwOnError();
+      return data;
+    },
+    enabled: !!id,
+  });
+}
+
 export function useCreateChat() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
