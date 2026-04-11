@@ -1,7 +1,7 @@
 import { Text, View } from "@/tw";
-import type { Message } from "@/types/chat";
+import type { Tables } from "@/types/database.types";
 
-export function MessageBubble({ message }: { message: Message }) {
+export function MessageBubble({ message }: { message: Tables<"messages"> }) {
   const isUser = message.role === "user";
 
   return (

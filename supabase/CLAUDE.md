@@ -12,6 +12,10 @@ using (auth.uid() = id);
 using ((select auth.uid()) = id);
 ```
 
+## Queries
+
+Even though RLS enforces access control, always filter by `user_id` (or equivalent) in application queries. This lets Postgres use indexes efficiently instead of relying solely on RLS to filter rows.
+
 ## Edge Functions
 
 - Written in Deno (TypeScript)

@@ -34,6 +34,70 @@ export type Database = {
   }
   public: {
     Tables: {
+      chats: {
+        Row: {
+          id: string
+          user_id: string
+          title: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chats_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      messages: {
+        Row: {
+          id: string
+          chat_id: string
+          role: Database["public"]["Enums"]["message_role"]
+          content: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          chat_id: string
+          role: Database["public"]["Enums"]["message_role"]
+          content: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          chat_id?: string
+          role?: Database["public"]["Enums"]["message_role"]
+          content?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       profiles: {
         Row: {
           id: string
@@ -66,7 +130,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      message_role: "user" | "assistant"
     }
     CompositeTypes: {
       [_ in never]: never

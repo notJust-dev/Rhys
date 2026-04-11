@@ -1,9 +1,14 @@
+import { supabase } from "@/providers/Supabase/client";
 import { Pressable, Text, View } from "@/tw";
 import { useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 
 export default function SettingsScreen() {
   const router = useRouter();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
 
   return (
     <View className="flex-1 bg-white px-6 pt-6">
@@ -24,6 +29,18 @@ export default function SettingsScreen() {
           size={16}
           tintColor="gray"
         />
+      </Pressable>
+
+      <Pressable
+        onPress={handleLogout}
+        className="flex-row items-center gap-3 py-4 mt-4 border-t border-gray-100"
+      >
+        <SymbolView
+          name={{ ios: "rectangle.portrait.and.arrow.right", android: "logout", web: "logout" }}
+          size={22}
+          tintColor="red"
+        />
+        <Text className="text-base text-red-500">Log Out</Text>
       </Pressable>
     </View>
   );
