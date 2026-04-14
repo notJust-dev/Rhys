@@ -9,7 +9,10 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.vadinsavin.AIChat"
+      "bundleIdentifier": "com.vadinsavin.AIChat",
+      "infoPlist": {
+        "NSPhotoLibraryAddUsageDescription": "This app needs access to your photo library to save images."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -37,7 +40,9 @@
           }
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      "react-native-enriched-markdown",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
