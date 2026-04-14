@@ -1,8 +1,10 @@
 import { useChats } from "@/services/chats";
 import type { Tables } from "@/types/database.types";
-import { LegendList } from "@legendapp/list/react-native";
+import { AnimatedLegendList } from "@legendapp/list/reanimated";
 import { useCallback } from "react";
+import { LinearTransition } from "react-native-reanimated";
 import { ChatListItem } from "./ChatListItem";
+
 
 type Chat = Tables<"chats">;
 
@@ -20,16 +22,17 @@ export function ChatsList() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
-    <LegendList
+    <AnimatedLegendList
       data={chats}
       keyExtractor={(item: Chat) => item.id}
       renderItem={renderItem}
       estimatedItemSize={48}
-      recycleItems
       contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}
       showsVerticalScrollIndicator={false}
       onEndReached={handleEndReached}
       onEndReachedThreshold={0.5}
+      itemLayoutAnimation={LinearTransition.duration(280)}
+
     />
   );
 }

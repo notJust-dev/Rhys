@@ -76,6 +76,34 @@ export function useChatById(id: string | null) {
   });
 }
 
+export function useDeleteChat() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await supabase.from("chats").delete().eq("id", id).throwOnError();
+      return id;
+    },
+    onSuccess: (deletedId) => {
+      queryClient.setQueryData<ChatsInfiniteData>(
+        ["chats", user?.id],
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) =>
+              page.filter((chat) => chat.id !== deletedId),
+            ),
+          };
+        },
+      );
+      queryClient.removeQueries({ queryKey: ["chat", deletedId] });
+      queryClient.removeQueries({ queryKey: ["messages", deletedId] });
+    },
+  });
+}
+
 export function useCreateChat() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
