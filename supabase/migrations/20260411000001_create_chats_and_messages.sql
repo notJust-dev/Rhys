@@ -57,6 +57,19 @@ create policy "Users can insert own messages"
     )
   );
 
+create policy "Users can update own messages"
+  on public.messages for update
+  using (
+    chat_id in (
+      select id from public.chats where user_id = (select auth.uid())
+    )
+  )
+  with check (
+    chat_id in (
+      select id from public.chats where user_id = (select auth.uid())
+    )
+  );
+
 -- Index for fast message lookup by chat
 create index messages_chat_id_idx on public.messages (chat_id);
 

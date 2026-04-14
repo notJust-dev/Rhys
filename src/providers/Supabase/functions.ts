@@ -5,7 +5,10 @@ import { supabasePublishableKey, supabaseUrl } from "./config";
 export async function invokeFunctionStream(
   name: string,
   body: unknown,
-): Promise<ReadableStreamDefaultReader<Uint8Array>> {
+): Promise<{
+  reader: ReadableStreamDefaultReader<Uint8Array>;
+  headers: Headers;
+}> {
   const { data } = await supabase.auth.getSession();
   const accessToken = data.session?.access_token ?? supabasePublishableKey;
 
@@ -23,5 +26,5 @@ export async function invokeFunctionStream(
     throw new Error(`Function "${name}" failed: ${response.status}`);
   }
 
-  return response.body.getReader();
+  return { reader: response.body.getReader(), headers: response.headers };
 }

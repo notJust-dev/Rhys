@@ -11,7 +11,7 @@ import { useMemo } from "react";
 type MessageRole = Database["public"]["Enums"]["message_role"];
 type Message = Tables<"messages">;
 
-export const MESSAGES_PAGE_SIZE = 2;
+export const MESSAGES_PAGE_SIZE = 10;
 
 type MessagesInfiniteData = InfiniteData<Message[], string | null>;
 

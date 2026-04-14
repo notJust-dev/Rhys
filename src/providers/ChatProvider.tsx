@@ -81,7 +81,8 @@ export function ChatProvider({
           { role: "user" as const, content: text },
         ];
 
-        const reader = await invokeFunctionStream("chat", {
+        const { reader, headers } = await invokeFunctionStream("chat", {
+          chatId: currentChatId,
           messages: chatMessages,
         });
 
@@ -96,11 +97,30 @@ export function ChatProvider({
         }
 
         if (assistantContent) {
-          await saveMessage.mutateAsync({
-            chatId: currentChatId,
-            role: "assistant",
-            content: assistantContent,
-          });
+          const messageId = headers.get("x-message-id");
+          const messageCreatedAt = headers.get("x-message-created-at");
+          if (messageId && messageCreatedAt) {
+            const saved: Message = {
+              id: messageId,
+              chat_id: currentChatId,
+              role: "assistant",
+              content: assistantContent,
+              created_at: messageCreatedAt,
+            };
+            queryClient.setQueryData<MessagesInfiniteData>(
+              ["messages", currentChatId],
+              (old) => {
+                if (!old) {
+                  return { pages: [[saved]], pageParams: [null] };
+                }
+                const [first = [], ...rest] = old.pages;
+                return {
+                  ...old,
+                  pages: [[saved, ...first], ...rest],
+                };
+              },
+            );
+          }
         }
       } catch {
         queryClient.setQueryData<MessagesInfiniteData>(
