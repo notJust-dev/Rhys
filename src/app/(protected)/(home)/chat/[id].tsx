@@ -20,7 +20,8 @@ export default function ChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { bottom } = useSafeAreaInsets();
   const extraContentPadding = useSharedValue(0);
-  const { title, messages, isLoading, sendMessage } = useChat(id!);
+  const { title, messages, isLoading, streamingContent, sendMessage } =
+    useChat(id!);
 
   const onInputLayout = useCallback(
     (e: LayoutChangeEvent) => {
@@ -46,7 +47,7 @@ export default function ChatScreen() {
           offset={bottom - MARGIN}
           extraContentPadding={extraContentPadding}
         >
-          {messages.length === 0 ? (
+          {messages.length === 0 && !streamingContent ? (
             <View className="flex-1 items-center justify-center py-20">
               <Text className="text-gray-400 text-base">
                 How can I help you today?
@@ -57,6 +58,17 @@ export default function ChatScreen() {
               {messages.map((message) => (
                 <MessageBubble key={message.id} message={message} />
               ))}
+              {streamingContent ? (
+                <MessageBubble
+                  message={{
+                    id: "streaming",
+                    chat_id: "",
+                    role: "assistant",
+                    content: streamingContent,
+                    created_at: new Date().toISOString(),
+                  }}
+                />
+              ) : null}
             </View>
           )}
         </KeyboardChatScrollView>
