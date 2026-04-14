@@ -27,6 +27,7 @@ export function ChatsList() {
       estimatedItemSize={48}
       recycleItems
       contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}
+      showsVerticalScrollIndicator={false}
       onEndReached={handleEndReached}
       onEndReachedThreshold={0.5}
     />

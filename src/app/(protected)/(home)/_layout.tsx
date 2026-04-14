@@ -46,21 +46,22 @@ function DrawerContent({ navigation }: DrawerContentComponentProps) {
         </Pressable>
       </View>
 
+      <ChatsList />
+
       <Pressable
         onPress={() => {
+          navigation.closeDrawer();
           router.push("/chat/new");
         }}
-        className="flex-row items-center gap-3 mx-4 mb-2 px-4 py-3 rounded-xl"
+        className="absolute bottom-10 right-6 bg-black rounded-full px-7 py-5 flex-row items-center gap-3 shadow-lg"
       >
         <SymbolView
-          name={{ ios: "plus.bubble", android: "add", web: "add" }}
-          size={20}
-          tintColor="gray"
+          name={{ ios: "square.and.pencil", android: "add", web: "add" }}
+          size={24}
+          tintColor="white"
         />
-        <Text className="text-base text-gray-900">New Chat</Text>
+        <Text className="text-white text-lg font-semibold">Chat</Text>
       </Pressable>
-
-      <ChatsList />
     </View>
   );
 }
