@@ -27,6 +27,7 @@ export default function ChatScreen() {
         <MessageList
           messages={messages}
           streamingContent={streamingContent}
+          isLoading={isLoading}
         />
 
         <KeyboardStickyView offset={{ opened: bottom }}>
