@@ -11,6 +11,7 @@ type AuthContextType = {
     isAnonymous: boolean;
     isAuthenticated: boolean;
     signInAnonymously: () => Promise<void>;
+    signInWithEmail: (email: string, password: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -65,6 +66,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, []);
 
+    const signInWithEmail = useCallback(async (email: string, password: string) => {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+            console.error('Error signing in with email:', error);
+            throw error;
+        }
+    }, []);
+
     useEffect(() => {
         queryClient.invalidateQueries({ queryKey: ['profile'] });
     }, [session?.user?.id])
@@ -84,6 +93,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 isAnonymous,
                 isAuthenticated,
                 signInAnonymously,
+                signInWithEmail,
             }}>
             {children}
         </AuthContext.Provider>

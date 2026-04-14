@@ -16,7 +16,11 @@ insert into auth.users (
   raw_user_meta_data,
   is_super_admin,
   created_at,
-  updated_at
+  updated_at,
+  confirmation_token,
+  email_change,
+  email_change_token_new,
+  recovery_token
 ) values (
   '00000000-0000-0000-0000-0000000000aa',
   '00000000-0000-0000-0000-000000000000',
@@ -29,8 +33,39 @@ insert into auth.users (
   '{"full_name":"Test User"}',
   false,
   now(),
-  now()
+  now(),
+  '',
+  '',
+  '',
+  ''
 ) on conflict (id) do nothing;
+
+-- GoTrue looks up identities on password sign-in. Without this row the
+-- lookup fails with "Database error querying schema".
+insert into auth.identities (
+  id,
+  user_id,
+  provider_id,
+  identity_data,
+  provider,
+  last_sign_in_at,
+  created_at,
+  updated_at
+) values (
+  gen_random_uuid(),
+  '00000000-0000-0000-0000-0000000000aa',
+  '00000000-0000-0000-0000-0000000000aa',
+  jsonb_build_object(
+    'sub', '00000000-0000-0000-0000-0000000000aa',
+    'email', 'test@example.com',
+    'email_verified', true,
+    'phone_verified', false
+  ),
+  'email',
+  now(),
+  now(),
+  now()
+) on conflict do nothing;
 
 -- The profile is auto-created by the on_auth_user_created trigger.
 
