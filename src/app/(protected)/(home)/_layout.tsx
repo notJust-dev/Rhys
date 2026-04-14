@@ -28,6 +28,24 @@ function DrawerContent({ navigation }: DrawerContentComponentProps) {
 
   return (
     <View className="flex-1 bg-white pt-16">
+      <View className="flex-row items-center justify-between px-6 pb-4">
+        <Text className="text-xl font-semibold text-gray-900">Chat AI</Text>
+        <Pressable
+          onPress={() => {
+            navigation.closeDrawer();
+            router.push("/settings");
+          }}
+          className="p-2 -mr-2"
+          hitSlop={8}
+        >
+          <SymbolView
+            name={{ ios: "gearshape", android: "settings", web: "settings" }}
+            size={22}
+            tintColor="gray"
+          />
+        </Pressable>
+      </View>
+
       <Pressable
         onPress={() => {
           router.push("/chat/new");
@@ -43,23 +61,6 @@ function DrawerContent({ navigation }: DrawerContentComponentProps) {
       </Pressable>
 
       <ChatsList />
-
-      <View className="px-4 pb-8 border-t border-gray-100">
-        <Pressable
-          onPress={() => {
-            navigation.closeDrawer();
-            router.push("/settings");
-          }}
-          className="flex-row items-center gap-3 px-4 py-3 rounded-xl"
-        >
-          <SymbolView
-            name={{ ios: "gearshape", android: "settings", web: "settings" }}
-            size={20}
-            tintColor="gray"
-          />
-          <Text className="text-base text-gray-900">Settings</Text>
-        </Pressable>
-      </View>
     </View>
   );
 }
