@@ -25,6 +25,23 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## Local test account
+
+`supabase/seed.sql` provisions a test user with 50 chats and conversation history on the 5 most recent chats (including markdown-formatted assistant replies) so you can exercise the UI without talking to OpenAI.
+
+| | |
+| --- | --- |
+| Email | `test@example.com` |
+| Password | `password123` |
+
+Apply the seed on a fresh local database:
+
+```bash
+npx supabase db reset
+```
+
+`db reset` runs all migrations and then executes `supabase/seed.sql`. Sign in with the credentials above from the app's login screen to see the seeded chats.
+
 ## Get a fresh project
 
 When you're ready, run:
