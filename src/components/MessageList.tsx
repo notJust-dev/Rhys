@@ -14,49 +14,82 @@ type Props = {
   messages: Message[];
   streamingContent: string;
   isLoading: boolean;
+  onLoadMore: () => void;
+  hasMore: boolean;
+  isFetchingMore: boolean;
 };
 
 export function MessageList({
   messages,
   streamingContent,
   isLoading,
+  onLoadMore,
+  hasMore,
+  isFetchingMore,
 }: Props) {
   const insets = useSafeAreaInsets();
 
+  const showTypingIndicator = isLoading && !streamingContent;
+
   const data = useMemo<Message[]>(() => {
-    if (!streamingContent) return messages;
-    return [
-      ...messages,
-      {
-        id: "streaming",
-        chat_id: "",
-        role: "assistant",
-        content: streamingContent,
-        created_at: new Date().toISOString(),
-      },
-    ];
-  }, [messages, streamingContent]);
+    const base = messages;
+    if (streamingContent) {
+      return [
+        ...base,
+        {
+          id: "streaming",
+          chat_id: "",
+          role: "assistant",
+          content: streamingContent,
+          created_at: new Date().toISOString(),
+        },
+      ];
+    }
+    if (showTypingIndicator) {
+      return [
+        ...base,
+        {
+          id: "typing",
+          chat_id: "",
+          role: "assistant",
+          content: "",
+          created_at: new Date().toISOString(),
+        },
+      ];
+    }
+    return base;
+  }, [messages, streamingContent, showTypingIndicator]);
 
   const renderItem = useCallback(
-    ({ item }: { item: Message }) => <MessageBubble message={item} />,
+    ({ item }: { item: Message }) =>
+      item.id === "typing" ? (
+        <View className="px-4 py-3 items-start">
+          <ActivityIndicator size="small" color="#9ca3af" />
+        </View>
+      ) : (
+        <MessageBubble message={item} />
+      ),
     [],
   );
 
   const handleScroll = useAnimatedScrollHandler({
-    onScroll: (_event) => {},
+    onScroll: (_event) => { },
   });
 
-  const showTypingIndicator = isLoading && !streamingContent;
-
-  const ListFooter = useCallback(
-    () =>
-      showTypingIndicator ? (
-        <View className="px-4 py-3 items-start">
+  const ListHeader = useCallback(
+    () => (
+      <View className="h-10 items-center justify-center">
+        {isFetchingMore ? (
           <ActivityIndicator size="small" color="#9ca3af" />
-        </View>
-      ) : null,
-    [showTypingIndicator],
+        ) : null}
+      </View>
+    ),
+    [isFetchingMore],
   );
+
+  const handleStartReached = useCallback(() => {
+    if (hasMore && !isFetchingMore) onLoadMore();
+  }, [hasMore, isFetchingMore, onLoadMore]);
 
 
   return (
@@ -67,15 +100,17 @@ export function MessageList({
       estimatedItemSize={80}
       alignItemsAtEnd
       initialScrollAtEnd
-      maintainVisibleContentPosition
+      maintainVisibleContentPosition={{ data: true }}
       maintainScrollAtEnd
       maintainScrollAtEndThreshold={0.1}
       recycleItems
       safeAreaInsetBottom={insets.bottom}
       contentContainerStyle={{ paddingTop: 16, gap: 4 }}
       onScroll={handleScroll}
-      ListFooterComponent={ListFooter}
+      ListHeaderComponent={ListHeader}
       ListEmptyComponent={EmptyChat}
+      onStartReached={handleStartReached}
+      onStartReachedThreshold={0.1}
     />
   );
 }

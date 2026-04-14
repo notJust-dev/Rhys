@@ -12,8 +12,16 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function ChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { bottom } = useSafeAreaInsets();
-  const { title, messages, isLoading, streamingContent, sendMessage } =
-    useChat(id!);
+  const {
+    title,
+    messages,
+    isLoading,
+    streamingContent,
+    sendMessage,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useChat(id!);
 
   return (
     <SafeAreaView edges={['bottom']} className="flex-1 bg-white">
@@ -28,6 +36,9 @@ export default function ChatScreen() {
           messages={messages}
           streamingContent={streamingContent}
           isLoading={isLoading}
+          onLoadMore={fetchNextPage}
+          hasMore={hasNextPage}
+          isFetchingMore={isFetchingNextPage}
         />
 
         <KeyboardStickyView offset={{ opened: bottom }}>

@@ -20,7 +20,12 @@ export function useChat(id: string) {
   const queryClient = useQueryClient();
 
   const { data: chat } = useChatById(chatId);
-  const { data: messages = [] } = useChatMessages(chatId);
+  const {
+    data: messages = [],
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useChatMessages(chatId);
   const createChat = useCreateChat();
   const saveMessage = useSaveMessage();
 
@@ -93,5 +98,14 @@ export function useChat(id: string) {
 
   const title = chat?.title ?? "New Chat";
 
-  return { title, messages, isLoading, streamingContent, sendMessage };
+  return {
+    title,
+    messages,
+    isLoading,
+    streamingContent,
+    sendMessage,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  };
 }
