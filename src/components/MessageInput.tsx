@@ -29,7 +29,6 @@ export function MessageInput({
         value={text}
         onChangeText={setText}
         multiline
-        nativeID="chat-input"
         onSubmitEditing={handleSend}
         submitBehavior="blurAndSubmit"
       />
