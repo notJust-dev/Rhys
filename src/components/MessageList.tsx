@@ -1,5 +1,6 @@
 import { EmptyChat } from "@/components/EmptyChat";
 import { MessageBubble } from "@/components/MessageBubble";
+import { useChatContext } from "@/providers/ChatProvider";
 import { View } from "@/tw";
 import type { Tables } from "@/types/database.types";
 import { KeyboardAvoidingLegendList } from "@legendapp/list/keyboard";
@@ -10,23 +11,15 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Message = Tables<"messages">;
 
-type Props = {
-  messages: Message[];
-  streamingContent: string;
-  isLoading: boolean;
-  onLoadMore: () => void;
-  hasMore: boolean;
-  isFetchingMore: boolean;
-};
-
-export function MessageList({
-  messages,
-  streamingContent,
-  isLoading,
-  onLoadMore,
-  hasMore,
-  isFetchingMore,
-}: Props) {
+export function MessageList() {
+  const {
+    messages,
+    streamingContent,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useChatContext();
   const insets = useSafeAreaInsets();
 
   const showTypingIndicator = isLoading && !streamingContent;
@@ -79,17 +72,17 @@ export function MessageList({
   const ListHeader = useCallback(
     () => (
       <View className="h-10 items-center justify-center">
-        {isFetchingMore ? (
+        {isFetchingNextPage ? (
           <ActivityIndicator size="small" color="#9ca3af" />
         ) : null}
       </View>
     ),
-    [isFetchingMore],
+    [isFetchingNextPage],
   );
 
   const handleStartReached = useCallback(() => {
-    if (hasMore && !isFetchingMore) onLoadMore();
-  }, [hasMore, isFetchingMore, onLoadMore]);
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
 
   return (

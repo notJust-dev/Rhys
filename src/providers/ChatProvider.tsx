@@ -1,12 +1,40 @@
-import { randomUUID } from "expo-crypto";
 import { invokeFunctionStream } from "@/providers/Supabase/functions";
 import { useChatById, useCreateChat } from "@/services/chats";
 import { useChatMessages, useSaveMessage } from "@/services/messages";
-import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import type { Tables } from "@/types/database.types";
+import { InfiniteData, useQueryClient } from "@tanstack/react-query";
+import { randomUUID } from "expo-crypto";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type PropsWithChildren,
+} from "react";
 
-export function useChat(id: string) {
-  const isNew = id === "new";
+type Message = Tables<"messages">;
+type MessagesInfiniteData = InfiniteData<Message[], string | null>;
+
+type ChatContextValue = {
+  chatId: string | null;
+  title: string;
+  messages: Message[];
+  isLoading: boolean;
+  streamingContent: string;
+  sendMessage: (text: string) => Promise<void>;
+  fetchNextPage: () => void;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+};
+
+const ChatContext = createContext<ChatContextValue | null>(null);
+
+export function ChatProvider({
+  chatId: routeId,
+  children,
+}: PropsWithChildren<{ chatId: string }>) {
+  const isNew = routeId === "new";
   const [createdChatId, setCreatedChatId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
@@ -14,9 +42,9 @@ export function useChat(id: string) {
   useEffect(() => {
     setCreatedChatId(null);
     setStreamingContent("");
-  }, [id]);
+  }, [routeId]);
 
-  const chatId = isNew ? createdChatId : id;
+  const chatId = isNew ? createdChatId : routeId;
   const queryClient = useQueryClient();
 
   const { data: chat } = useChatById(chatId);
@@ -75,18 +103,25 @@ export function useChat(id: string) {
           });
         }
       } catch {
-        queryClient.setQueryData(
+        queryClient.setQueryData<MessagesInfiniteData>(
           ["messages", chatId],
-          (old: typeof messages) => [
-            ...(old ?? []),
-            {
+          (old) => {
+            const errorMessage: Message = {
               id: randomUUID(),
               chat_id: chatId!,
-              role: "assistant" as const,
+              role: "assistant",
               content: "Something went wrong. Please try again.",
               created_at: new Date().toISOString(),
-            },
-          ],
+            };
+            if (!old) {
+              return { pages: [[errorMessage]], pageParams: [null] };
+            }
+            const [first = [], ...rest] = old.pages;
+            return {
+              ...old,
+              pages: [[errorMessage, ...first], ...rest],
+            };
+          },
         );
       } finally {
         setStreamingContent("");
@@ -98,14 +133,29 @@ export function useChat(id: string) {
 
   const title = chat?.title ?? "New Chat";
 
-  return {
-    title,
-    messages,
-    isLoading,
-    streamingContent,
-    sendMessage,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  };
+  return (
+    <ChatContext.Provider
+      value={{
+        chatId,
+        title,
+        messages,
+        isLoading,
+        streamingContent,
+        sendMessage,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+      }}
+    >
+      {children}
+    </ChatContext.Provider>
+  );
+}
+
+export function useChatContext() {
+  const ctx = useContext(ChatContext);
+  if (!ctx) {
+    throw new Error("useChatContext must be used within a ChatProvider");
+  }
+  return ctx;
 }

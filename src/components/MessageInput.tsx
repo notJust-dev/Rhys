@@ -1,24 +1,22 @@
+import { useChatContext } from "@/providers/ChatProvider";
 import { Pressable, Text, TextInput, View } from "@/tw";
 import { useCallback, useState } from "react";
 import type { LayoutChangeEvent } from "react-native";
 
 export function MessageInput({
-  onSend,
   onLayout,
-  isLoading,
 }: {
-  onSend: (message: string) => void;
   onLayout?: (e: LayoutChangeEvent) => void;
-  isLoading?: boolean;
 }) {
+  const { sendMessage, isLoading } = useChatContext();
   const [text, setText] = useState("");
 
   const handleSend = useCallback(() => {
     const trimmed = text.trim();
     if (!trimmed) return;
-    onSend(trimmed);
+    sendMessage(trimmed);
     setText("");
-  }, [text, onSend]);
+  }, [text, sendMessage]);
 
   return (
     <View className="bg-white px-4 py-2 flex-row items-end gap-2" onLayout={onLayout}>
