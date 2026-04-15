@@ -1,7 +1,8 @@
 import { useDeleteChat } from "@/services/chats";
-import { Link, Text, View } from "@/tw";
+import { Text, View } from "@/tw";
 import type { Tables } from "@/types/database.types";
 import { useGlobalSearchParams, useRouter } from "expo-router";
+import { ChatListItemMenu } from "./ChatListItemMenu";
 
 export function ChatListItem({ chat }: { chat: Tables<"chats"> }) {
   const router = useRouter();
@@ -15,23 +16,16 @@ export function ChatListItem({ chat }: { chat: Tables<"chats"> }) {
   };
 
   return (
-    <Link href={`/chat/${chat.id}`}>
-      <Link.Trigger>
-        <View
-          className={`px-4 py-3 rounded-xl ${isActive ? "bg-gray-200" : ""}`}
-        >
-          <Text className="text-base text-gray-900" numberOfLines={1}>
-            {chat.title ?? "Untitled"}
-          </Text>
-        </View>
-      </Link.Trigger>
-      <Link.Menu>
-        <Link.MenuAction
-          icon="trash"
-          destructive
-          onPress={handleDelete}
-        >Delete</Link.MenuAction>
-      </Link.Menu>
-    </Link>
+    <ChatListItemMenu href={`/chat/${chat.id}`} onDelete={handleDelete}>
+      <View
+        className={`px-4 py-3 w-full rounded-xl ${
+          isActive ? "bg-gray-200" : ""
+        }`}
+      >
+        <Text className="text-base text-gray-900" numberOfLines={1}>
+          {chat.title ?? "Untitled"}
+        </Text>
+      </View>
+    </ChatListItemMenu>
   );
 }

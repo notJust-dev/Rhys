@@ -13,6 +13,7 @@
     "supa:types:local": "npx supabase gen types typescript --local > src/types/database.types.ts"
   },
   "dependencies": {
+    "@expo/ui": "~55.0.11",
     "@legendapp/list": "^3.0.0-beta.44",
     "@react-navigation/bottom-tabs": "^7.15.5",
     "@react-navigation/drawer": "^7.9.8",
