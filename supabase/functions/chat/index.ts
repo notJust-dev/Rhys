@@ -27,6 +27,20 @@ Deno.serve(async (req: Request) => {
 
   const supabase = createSupabaseClient(req);
 
+  const { data: chatRow, error: chatError } = await supabase
+    .from("chats")
+    .select("model")
+    .eq("id", chatId)
+    .single();
+
+  if (chatError || !chatRow) {
+    return new Response(chatError?.message ?? "Chat not found", {
+      status: 404,
+    });
+  }
+
+  const model = chatRow.model ?? "gpt-4o-mini";
+
   // Create a placeholder assistant row up front so we can stream its id back
   // to the client in response headers. Filled in on stream completion.
   const { data: placeholder, error: insertError } = await supabase
@@ -49,7 +63,7 @@ Deno.serve(async (req: Request) => {
       Authorization: `Bearer ${OPENAI_API_KEY}`,
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
+      model,
       messages,
       stream: true,
     }),

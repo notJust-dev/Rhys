@@ -36,25 +36,31 @@ export type Database = {
     Tables: {
       chats: {
         Row: {
-          id: string
-          user_id: string
-          title: string | null
           created_at: string
+          id: string
+          model: string | null
+          provider: string | null
+          title: string | null
           updated_at: string
+          user_id: string
         }
         Insert: {
-          id?: string
-          user_id: string
-          title?: string | null
           created_at?: string
+          id?: string
+          model?: string | null
+          provider?: string | null
+          title?: string | null
           updated_at?: string
+          user_id: string
         }
         Update: {
-          id?: string
-          user_id?: string
-          title?: string | null
           created_at?: string
+          id?: string
+          model?: string | null
+          provider?: string | null
+          title?: string | null
           updated_at?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -63,30 +69,30 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       messages: {
         Row: {
-          id: string
           chat_id: string
-          role: Database["public"]["Enums"]["message_role"]
           content: string
           created_at: string
+          id: string
+          role: Database["public"]["Enums"]["message_role"]
         }
         Insert: {
-          id?: string
           chat_id: string
-          role: Database["public"]["Enums"]["message_role"]
           content: string
           created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["message_role"]
         }
         Update: {
-          id?: string
           chat_id?: string
-          role?: Database["public"]["Enums"]["message_role"]
           content?: string
           created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["message_role"]
         }
         Relationships: [
           {
@@ -95,29 +101,29 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "chats"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       profiles: {
         Row: {
-          id: string
-          name: string | null
           avatar_url: string | null
           created_at: string
+          id: string
+          name: string | null
           updated_at: string
         }
         Insert: {
-          id: string
-          name?: string | null
           avatar_url?: string | null
           created_at?: string
+          id: string
+          name?: string | null
           updated_at?: string
         }
         Update: {
-          id?: string
-          name?: string | null
           avatar_url?: string | null
           created_at?: string
+          id?: string
+          name?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -260,7 +266,9 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      message_role: ["user", "assistant"],
+    },
   },
 } as const
 

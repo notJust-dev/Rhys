@@ -142,10 +142,19 @@ export function useCreateChat() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (title?: string) => {
+    mutationFn: async ({
+      title,
+      model,
+      provider,
+    }: { title?: string; model?: string; provider?: string } = {}) => {
       const { data } = await supabase
         .from("chats")
-        .insert({ user_id: user!.id, title: title ?? null })
+        .insert({
+          user_id: user!.id,
+          title: title ?? null,
+          model: model ?? null,
+          provider: provider ?? null,
+        })
         .select()
         .single()
         .throwOnError();

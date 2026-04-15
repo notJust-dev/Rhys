@@ -1,3 +1,4 @@
+import { DEFAULT_MODEL, getModelById } from "@/constants/models";
 import { invokeFunctionStream } from "@/providers/Supabase/functions";
 import { useChatById, useCreateChat } from "@/services/chats";
 import { useChatMessages, useSaveMessage } from "@/services/messages";
@@ -26,6 +27,9 @@ type ChatContextValue = {
   fetchNextPage: () => void;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
+  isNew: boolean;
+  selectedModel: string;
+  setSelectedModel: (model: string) => void;
 };
 
 const ChatContext = createContext<ChatContextValue | null>(null);
@@ -38,10 +42,12 @@ export function ChatProvider({
   const [createdChatId, setCreatedChatId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
+  const [pendingModel, setPendingModel] = useState<string>(DEFAULT_MODEL.id);
 
   useEffect(() => {
     setCreatedChatId(null);
     setStreamingContent("");
+    setPendingModel(DEFAULT_MODEL.id);
   }, [routeId]);
 
   const chatId = isNew ? createdChatId : routeId;
@@ -65,7 +71,12 @@ export function ChatProvider({
       try {
         let currentChatId = chatId;
         if (!currentChatId) {
-          const newChat = await createChat.mutateAsync(text);
+          const pending = getModelById(pendingModel);
+          const newChat = await createChat.mutateAsync({
+            title: text,
+            model: pending.id,
+            provider: pending.provider,
+          });
           currentChatId = newChat.id;
           setCreatedChatId(currentChatId);
         }
@@ -148,10 +159,11 @@ export function ChatProvider({
         setIsLoading(false);
       }
     },
-    [chatId, messages, createChat, saveMessage, queryClient],
+    [chatId, messages, createChat, saveMessage, queryClient, pendingModel],
   );
 
   const title = chat?.title ?? "New Chat";
+  const selectedModel = chat?.model ?? pendingModel;
 
   return (
     <ChatContext.Provider
@@ -165,6 +177,9 @@ export function ChatProvider({
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
+        isNew,
+        selectedModel,
+        setSelectedModel: setPendingModel,
       }}
     >
       {children}
