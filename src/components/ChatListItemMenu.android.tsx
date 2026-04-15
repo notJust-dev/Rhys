@@ -12,11 +12,17 @@ import type { ChatListItemMenuProps } from "./ChatListItemMenu";
 
 export function ChatListItemMenu({
   href,
+  onEdit,
   onDelete,
   children,
 }: ChatListItemMenuProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+
+  const handleEdit = () => {
+    setOpen(false);
+    onEdit();
+  };
 
   const handleDelete = () => {
     setOpen(false);
@@ -43,6 +49,11 @@ export function ChatListItemMenu({
             </Pressable>
           </DropdownMenu.Trigger>
           <DropdownMenu.Items>
+            <DropdownMenuItem onClick={handleEdit}>
+              <DropdownMenuItem.Text>
+                <Text>Rename</Text>
+              </DropdownMenuItem.Text>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleDelete}>
               <DropdownMenuItem.Text>
                 <Text>Delete</Text>

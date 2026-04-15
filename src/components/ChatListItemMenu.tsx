@@ -3,10 +3,11 @@ import type { ReactNode } from "react";
 
 export type ChatListItemMenuProps = {
   href: Href;
+  onEdit: () => void;
   onDelete: () => void;
   children: ReactNode;
 };
 
-export function ChatListItemMenu(_props: ChatListItemMenuProps): null {
-  return null;
+export function ChatListItemMenu({ children }: ChatListItemMenuProps) {
+  return children;
 }

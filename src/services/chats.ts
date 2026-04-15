@@ -76,6 +76,39 @@ export function useChatById(id: string | null) {
   });
 }
 
+export function useUpdateChatTitle() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, title }: { id: string; title: string }) => {
+      const { data } = await supabase
+        .from("chats")
+        .update({ title })
+        .eq("id", id)
+        .select()
+        .single()
+        .throwOnError();
+      return data;
+    },
+    onSuccess: (updated) => {
+      queryClient.setQueryData<ChatsInfiniteData>(
+        ["chats", user?.id],
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) =>
+              page.map((chat) => (chat.id === updated.id ? updated : chat)),
+            ),
+          };
+        },
+      );
+      queryClient.setQueryData(["chat", updated.id], updated);
+    },
+  });
+}
+
 export function useDeleteChat() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
