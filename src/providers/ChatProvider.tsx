@@ -5,11 +5,13 @@ import { useChatMessages, useSaveMessage } from "@/services/messages";
 import type { Tables } from "@/types/database.types";
 import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 import { randomUUID } from "expo-crypto";
+import { useRouter } from "expo-router";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type PropsWithChildren,
 } from "react";
@@ -38,19 +40,26 @@ export function ChatProvider({
   chatId: routeId,
   children,
 }: PropsWithChildren<{ chatId: string }>) {
-  const isNew = routeId === "new";
+  const router = useRouter();
   const [createdChatId, setCreatedChatId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
   const [pendingModel, setPendingModel] = useState<string>(DEFAULT_MODEL.id);
+  const createdChatIdRef = useRef<string | null>(null);
+
+  const isNew = routeId === "new" && !createdChatId;
 
   useEffect(() => {
+    // When expo-router replaces the param from "new" to the real id we just
+    // created, keep streaming/provider state intact.
+    if (routeId === createdChatIdRef.current) return;
+    createdChatIdRef.current = null;
     setCreatedChatId(null);
     setStreamingContent("");
     setPendingModel(DEFAULT_MODEL.id);
   }, [routeId]);
 
-  const chatId = isNew ? createdChatId : routeId;
+  const chatId = routeId === "new" ? createdChatId : routeId;
   const queryClient = useQueryClient();
 
   const { data: chat } = useChatById(chatId);
@@ -78,7 +87,9 @@ export function ChatProvider({
             provider: pending.provider,
           });
           currentChatId = newChat.id;
+          createdChatIdRef.current = currentChatId;
           setCreatedChatId(currentChatId);
+          router.setParams({ id: currentChatId });
         }
 
         await saveMessage.mutateAsync({
@@ -159,7 +170,7 @@ export function ChatProvider({
         setIsLoading(false);
       }
     },
-    [chatId, messages, createChat, saveMessage, queryClient, pendingModel],
+    [chatId, messages, createChat, saveMessage, queryClient, pendingModel, router],
   );
 
   const title = chat?.title ?? "New Chat";
