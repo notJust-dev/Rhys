@@ -20,6 +20,8 @@ type AuthContextType = {
     resetPasswordForEmail: (email: string) => Promise<void>;
     verifyPasswordResetOtp: (email: string, token: string) => Promise<void>;
     updatePassword: (password: string) => Promise<void>;
+    verifySignUpOtp: (email: string, token: string) => Promise<void>;
+    resendSignUpOtp: (email: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -113,6 +115,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, []);
 
+    const verifySignUpOtp = useCallback(
+        async (email: string, token: string) => {
+            const { error } = await supabase.auth.verifyOtp({
+                email,
+                token,
+                type: 'signup',
+            });
+            if (error) {
+                console.error('Error verifying sign up OTP:', error);
+                throw error;
+            }
+        },
+        [],
+    );
+
+    const resendSignUpOtp = useCallback(async (email: string) => {
+        const { error } = await supabase.auth.resend({ type: 'signup', email });
+        if (error) {
+            console.error('Error resending sign up OTP:', error);
+            throw error;
+        }
+    }, []);
+
     const signUpWithEmail = useCallback(
         async (email: string, password: string, name?: string) => {
             const { error } = await supabase.auth.signUp({
@@ -152,6 +177,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 resetPasswordForEmail,
                 verifyPasswordResetOtp,
                 updatePassword,
+                verifySignUpOtp,
+                resendSignUpOtp,
             }}>
             {children}
         </AuthContext.Provider>

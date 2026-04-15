@@ -36,7 +36,7 @@ export default function SignUpScreen() {
     setError(null);
     try {
       await signUpWithEmail(email, password, name);
-      router.replace("/chat/new");
+      router.push({ pathname: "/verify-email", params: { email } });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Sign up failed");
     }
