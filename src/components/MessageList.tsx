@@ -1,26 +1,20 @@
 import { EmptyChat } from "@/components/EmptyChat";
 import { MessageBubble } from "@/components/MessageBubble";
+import { ScrollToBottomButton } from "@/components/ScrollToBottomButton";
 import { useChatContext } from "@/providers/ChatProvider";
-import { Pressable, View } from "@/tw";
-import { Animated } from "@/tw/animated";
+import { View } from "@/tw";
 import type { Tables } from "@/types/database.types";
 import { KeyboardAvoidingLegendList } from "@legendapp/list/keyboard";
 import type { LegendListRef } from "@legendapp/list/react-native";
-import { SymbolView } from "expo-symbols";
 import { useCallback, useMemo, useRef } from "react";
 import { ActivityIndicator } from "react-native";
-import { useReanimatedKeyboardAnimation } from "react-native-keyboard-controller";
 import {
   useAnimatedScrollHandler,
-  useAnimatedStyle,
   useSharedValue,
-  withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Message = Tables<"messages">;
-
-const SCROLL_BUTTON_THRESHOLD = 200;
 
 export function MessageList() {
   const {
@@ -33,8 +27,15 @@ export function MessageList() {
   } = useChatContext();
   const insets = useSafeAreaInsets();
   const listRef = useRef<LegendListRef>(null);
-  const scrollButtonOpacity = useSharedValue(0);
-  const { height: keyboardHeight } = useReanimatedKeyboardAnimation();
+  const distanceFromBottom = useSharedValue(0);
+
+  const handleScroll = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      distanceFromBottom.value =
+        event.contentSize.height -
+        (event.contentOffset.y + event.layoutMeasurement.height);
+    },
+  });
 
   const showTypingIndicator = isLoading && !streamingContent;
 
@@ -79,29 +80,6 @@ export function MessageList() {
     [],
   );
 
-  const handleScroll = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      const distanceFromBottom =
-        event.contentSize.height -
-        (event.contentOffset.y + event.layoutMeasurement.height);
-      const target = distanceFromBottom > SCROLL_BUTTON_THRESHOLD ? 1 : 0;
-      if (scrollButtonOpacity.value !== target) {
-        scrollButtonOpacity.value = withTiming(target, { duration: 150 });
-      }
-    },
-  });
-
-  const scrollButtonStyle = useAnimatedStyle(() => ({
-    opacity: scrollButtonOpacity.value,
-    transform: [
-      { translateY: Math.min(keyboardHeight.value + insets.bottom, 0) },
-    ],
-  }));
-
-  const scrollToBottom = useCallback(() => {
-    listRef.current?.scrollToEnd({ animated: true });
-  }, []);
-
   const ListHeader = useCallback(
     () => (
       <View className="h-10 items-center justify-center">
@@ -140,25 +118,10 @@ export function MessageList() {
         onStartReached={handleStartReached}
         onStartReachedThreshold={0.1}
       />
-      <Animated.View
-        style={scrollButtonStyle}
-        className="absolute self-center bottom-4"
-      >
-        <Pressable
-          onPress={scrollToBottom}
-          className="w-10 h-10 rounded-full bg-white border border-gray-200 items-center justify-center shadow"
-        >
-          <SymbolView
-            name={{
-              ios: "arrow.down",
-              android: "arrow_downward",
-              web: "arrow_downward",
-            }}
-            size={18}
-            tintColor="gray"
-          />
-        </Pressable>
-      </Animated.View>
+      <ScrollToBottomButton
+        listRef={listRef}
+        distanceFromBottom={distanceFromBottom}
+      />
     </View>
   );
 }
