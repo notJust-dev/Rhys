@@ -1,20 +1,32 @@
+import { ControlledInput } from "@/components/form/ControlledInput";
 import { useProfile, useUpdateProfile } from "@/services/profile";
-import { Pressable, Text, TextInput, View } from "@/tw";
-import { useEffect, useState } from "react";
+import { Pressable, Text, View } from "@/tw";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { z } from "zod";
+
+const editProfileSchema = z.object({
+  name: z.string().trim().max(80, "Name is too long"),
+});
+
+type EditProfileForm = z.infer<typeof editProfileSchema>;
 
 export default function EditProfileScreen() {
   const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
 
-  const [name, setName] = useState("");
+  const methods = useForm<EditProfileForm>({
+    resolver: zodResolver(editProfileSchema),
+    defaultValues: { name: "" },
+  });
+  const { handleSubmit, reset } = methods;
 
   useEffect(() => {
-    if (profile) {
-      setName(profile.name ?? "");
-    }
-  }, [profile]);
+    if (profile) reset({ name: profile.name ?? "" });
+  }, [profile, reset]);
 
-  const handleSave = () => {
+  const onSubmit = ({ name }: EditProfileForm) => {
     updateProfile.mutate({
       name: name || null,
       updated_at: new Date().toISOString(),
@@ -30,27 +42,23 @@ export default function EditProfileScreen() {
   }
 
   return (
-    <View className="flex-1 bg-white px-6 pt-6 gap-6">
-      <View className="gap-2">
-        <Text className="text-sm font-medium text-gray-500">Name</Text>
-        <TextInput
-          value={name}
-          onChangeText={setName}
+    <FormProvider {...methods}>
+      <View className="flex-1 bg-white px-6 pt-6 gap-2">
+        <ControlledInput<EditProfileForm>
+          name="name"
+          label="Name"
           placeholder="Your name"
-          className="border border-gray-200 rounded-xl px-4 py-3 text-base"
         />
-      </View>
 
-      <Pressable
-        onPress={handleSave}
-        disabled={updateProfile.isPending}
-        className="bg-black rounded-full py-4 items-center mt-2"
-        style={{ opacity: updateProfile.isPending ? 0.5 : 1 }}
-      >
-        <Text className="text-white text-base font-semibold">
-          Save
-        </Text>
-      </Pressable>
-    </View>
+        <Pressable
+          onPress={handleSubmit(onSubmit)}
+          disabled={updateProfile.isPending}
+          className="bg-black rounded-full py-4 items-center mt-2"
+          style={{ opacity: updateProfile.isPending ? 0.5 : 1 }}
+        >
+          <Text className="text-white text-base font-semibold">Save</Text>
+        </Pressable>
+      </View>
+    </FormProvider>
   );
 }

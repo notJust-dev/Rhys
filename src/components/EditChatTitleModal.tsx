@@ -1,7 +1,17 @@
+import { ControlledInput } from "@/components/form/ControlledInput";
 import { useUpdateChatTitle } from "@/services/chats";
-import { Pressable, Text, TextInput, View } from "@/tw";
-import { useEffect, useState } from "react";
+import { Pressable, Text, View } from "@/tw";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 import { Modal } from "react-native";
+import { z } from "zod";
+
+const renameSchema = z.object({
+  title: z.string().trim().min(1, "Title is required").max(120, "Too long"),
+});
+
+type RenameForm = z.infer<typeof renameSchema>;
 
 type Props = {
   visible: boolean;
@@ -16,20 +26,19 @@ export function EditChatTitleModal({
   initialTitle,
   onClose,
 }: Props) {
-  const [value, setValue] = useState(initialTitle ?? "");
   const updateTitle = useUpdateChatTitle();
+  const methods = useForm<RenameForm>({
+    resolver: zodResolver(renameSchema),
+    defaultValues: { title: initialTitle ?? "" },
+  });
+  const { handleSubmit, reset } = methods;
 
   useEffect(() => {
-    if (visible) setValue(initialTitle ?? "");
-  }, [visible, initialTitle]);
+    if (visible) reset({ title: initialTitle ?? "" });
+  }, [visible, initialTitle, reset]);
 
-  const handleSave = () => {
-    const trimmed = value.trim();
-    if (!trimmed) return;
-    updateTitle.mutate(
-      { id: chatId, title: trimmed },
-      { onSuccess: onClose },
-    );
+  const onSubmit = ({ title }: RenameForm) => {
+    updateTitle.mutate({ id: chatId, title }, { onSuccess: onClose });
   };
 
   return (
@@ -47,22 +56,22 @@ export function EditChatTitleModal({
           <Text className="text-lg font-semibold text-gray-900 mb-3">
             Rename chat
           </Text>
-          <TextInput
-            value={value}
-            onChangeText={setValue}
-            autoFocus
-            placeholder="Chat title"
-            className="border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900"
-            onSubmitEditing={handleSave}
-            returnKeyType="done"
-          />
-          <View className="flex-row justify-end gap-2 mt-4">
+          <FormProvider {...methods}>
+            <ControlledInput<RenameForm>
+              name="title"
+              placeholder="Chat title"
+              autoFocus
+              returnKeyType="done"
+              onSubmitEditing={handleSubmit(onSubmit)}
+            />
+          </FormProvider>
+          <View className="flex-row justify-end gap-2 mt-2">
             <Pressable onPress={onClose} className="px-4 py-2 rounded-xl">
               <Text className="text-gray-600 font-medium">Cancel</Text>
             </Pressable>
             <Pressable
-              onPress={handleSave}
-              disabled={updateTitle.isPending || !value.trim()}
+              onPress={handleSubmit(onSubmit)}
+              disabled={updateTitle.isPending}
               className="px-4 py-2 rounded-xl bg-black"
             >
               <Text className="text-white font-medium">Save</Text>
