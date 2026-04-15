@@ -1,6 +1,6 @@
 import { ControlledInput } from "@/components/form/ControlledInput";
 import { useAuth } from "@/providers/Supabase/AuthProvider";
-import { Link, Pressable, Text, View } from "@/tw";
+import { Pressable, Text, View } from "@/tw";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -8,21 +8,20 @@ import { FormProvider, useForm } from "react-hook-form";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { z } from "zod";
 
-const signInSchema = z.object({
+const forgotPasswordSchema = z.object({
   email: z.string().trim().email("Enter a valid email"),
-  password: z.string().min(1, "Password is required"),
 });
 
-type SignInForm = z.infer<typeof signInSchema>;
+type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
 
-export default function SignInScreen() {
-  const { signInWithEmail } = useAuth();
+export default function ForgotPasswordScreen() {
+  const { resetPasswordForEmail } = useAuth();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
-  const methods = useForm<SignInForm>({
-    resolver: zodResolver(signInSchema),
-    defaultValues: { email: "", password: "" },
+  const methods = useForm<ForgotPasswordForm>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: { email: "" },
     mode: "onBlur",
   });
 
@@ -31,13 +30,13 @@ export default function SignInScreen() {
     formState: { isSubmitting },
   } = methods;
 
-  const onSubmit = async ({ email, password }: SignInForm) => {
+  const onSubmit = async ({ email }: ForgotPasswordForm) => {
     setError(null);
     try {
-      await signInWithEmail(email, password);
-      router.replace("/chat/new");
+      await resetPasswordForEmail(email);
+      router.push({ pathname: "/reset-password", params: { email } });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Sign in failed");
+      setError(e instanceof Error ? e.message : "Failed to send reset email");
     }
   };
 
@@ -48,10 +47,14 @@ export default function SignInScreen() {
         contentInsetAdjustmentBehavior="automatic"
         style={{ backgroundColor: "white" }}
         mode="layout"
-
       >
         <View className="px-8 pt-6 gap-2">
-          <ControlledInput<SignInForm>
+          <Text className="text-base text-gray-500 mb-4">
+            Enter the email associated with your account and we'll send you a
+            verification code.
+          </Text>
+
+          <ControlledInput<ForgotPasswordForm>
             name="email"
             label="Email"
             placeholder="you@example.com"
@@ -59,26 +62,12 @@ export default function SignInScreen() {
             autoComplete="email"
             keyboardType="email-address"
             editable={!isSubmitting}
-          />
-
-          <ControlledInput<SignInForm>
-            name="password"
-            label="Password"
-            placeholder="••••••••"
-            secureTextEntry
-            autoComplete="password"
-            editable={!isSubmitting}
             onSubmitEditing={handleSubmit(onSubmit)}
           />
 
-          {error ? <Text className="text-sm text-red-600">{error}</Text> : null}
-
-          <Link
-            href="/forgot-password"
-            className="text-sm text-gray-600 font-medium"
-          >
-            Forgot password?
-          </Link>
+          {error ? (
+            <Text className="text-sm text-red-600">{error}</Text>
+          ) : null}
 
           <Pressable
             className="bg-black rounded-full px-8 py-4 mt-4 items-center"
@@ -87,16 +76,9 @@ export default function SignInScreen() {
             style={{ opacity: isSubmitting ? 0.5 : 1 }}
           >
             <Text className="text-white text-base font-semibold">
-              {isSubmitting ? "Signing in…" : "Sign in"}
+              {isSubmitting ? "Sending…" : "Send code"}
             </Text>
           </Pressable>
-
-          <View className="flex-row justify-center mt-4">
-            <Text className="text-gray-500 text-sm">Don't have an account? </Text>
-            <Link href="/sign-up" className="text-black text-sm font-semibold">
-              Sign up
-            </Link>
-          </View>
         </View>
       </KeyboardAwareScrollView>
     </FormProvider>

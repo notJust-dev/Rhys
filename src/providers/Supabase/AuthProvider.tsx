@@ -17,6 +17,9 @@ type AuthContextType = {
         password: string,
         name?: string,
     ) => Promise<void>;
+    resetPasswordForEmail: (email: string) => Promise<void>;
+    verifyPasswordResetOtp: (email: string, token: string) => Promise<void>;
+    updatePassword: (password: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -79,6 +82,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, []);
 
+    const resetPasswordForEmail = useCallback(async (email: string) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email);
+        if (error) {
+            console.error('Error sending password reset email:', error);
+            throw error;
+        }
+    }, []);
+
+    const verifyPasswordResetOtp = useCallback(
+        async (email: string, token: string) => {
+            const { error } = await supabase.auth.verifyOtp({
+                email,
+                token,
+                type: 'recovery',
+            });
+            if (error) {
+                console.error('Error verifying password reset OTP:', error);
+                throw error;
+            }
+        },
+        [],
+    );
+
+    const updatePassword = useCallback(async (password: string) => {
+        const { error } = await supabase.auth.updateUser({ password });
+        if (error) {
+            console.error('Error updating password:', error);
+            throw error;
+        }
+    }, []);
+
     const signUpWithEmail = useCallback(
         async (email: string, password: string, name?: string) => {
             const { error } = await supabase.auth.signUp({
@@ -115,6 +149,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 signInAnonymously,
                 signInWithEmail,
                 signUpWithEmail,
+                resetPasswordForEmail,
+                verifyPasswordResetOtp,
+                updatePassword,
             }}>
             {children}
         </AuthContext.Provider>
