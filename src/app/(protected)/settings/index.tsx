@@ -1,6 +1,5 @@
 import { supabase } from "@/providers/Supabase/client";
 import { Pressable, ScrollView, Text, View } from "@/tw";
-import { showFeedbackWidget } from "@sentry/react-native";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { SymbolView, type SymbolViewProps } from "expo-symbols";
@@ -92,7 +91,7 @@ export default function SettingsScreen() {
             web: "bug_report",
           }}
           label="Report a Bug"
-          onPress={() => showFeedbackWidget()}
+          onPress={() => router.push("/settings/bug-report")}
         />
 
         {termsOfUseUrl ? (
