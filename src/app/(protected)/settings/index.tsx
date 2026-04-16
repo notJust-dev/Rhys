@@ -32,6 +32,25 @@ export default function SettingsScreen() {
       </Pressable>
 
       <Pressable
+        onPress={() => router.push('/settings/subscription')}
+        className="flex-row items-center justify-between py-4"
+      >
+        <View className="flex-row items-center gap-3">
+          <SymbolView
+            name={{ ios: "crown", android: "workspace_premium", web: "workspace_premium" }}
+            size={22}
+            tintColor="gray"
+          />
+          <Text className="text-base text-gray-900">Manage Subscription</Text>
+        </View>
+        <SymbolView
+          name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
+          size={16}
+          tintColor="gray"
+        />
+      </Pressable>
+
+      <Pressable
         onPress={handleLogout}
         className="flex-row items-center gap-3 py-4 mt-4 border-t border-gray-100"
       >
