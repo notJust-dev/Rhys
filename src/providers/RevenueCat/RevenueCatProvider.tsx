@@ -1,13 +1,41 @@
 import { posthog } from '@/providers/Posthog/posthog';
-// import { enableAdServicesIfResolved } from '@/toolbox/TrackingTransparency/requestTracking';
 import * as Sentry from '@sentry/react-native';
-import { PropsWithChildren, useEffect, useRef, useState } from 'react';
+import { PropsWithChildren, createContext, useContext, useEffect, useRef, useState } from 'react';
 import Purchases, { CustomerInfo } from 'react-native-purchases';
 import { useUser } from '../Supabase/AuthProvider';
-import { apiKey, logLevel } from './config';
+import { apiKey, entitlements, logLevel } from './config';
+
+type SubscriptionState = {
+  isPro: boolean;
+  isPlus: boolean;
+  isSubscribed: boolean;
+  isLoading: boolean;
+};
+
+const SubscriptionContext = createContext<SubscriptionState>({
+  isPro: false,
+  isPlus: false,
+  isSubscribed: false,
+  isLoading: true,
+});
+
+export function useSubscription() {
+  return useContext(SubscriptionContext);
+}
+
+function resolveEntitlements(active: Record<string, unknown>) {
+  const isPro = typeof active[entitlements.pro] !== 'undefined';
+  const isPlus = typeof active[entitlements.plus] !== 'undefined';
+  return { isPro, isPlus, isSubscribed: isPro || isPlus };
+}
 
 export default function RevenueCatProvider({ children }: PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(true);
+  const [subscription, setSubscription] = useState<Omit<SubscriptionState, 'isLoading'>>({
+    isPro: false,
+    isPlus: false,
+    isSubscribed: false,
+  });
 
   const user = useUser();
   const lastIdentifiedUserId = useRef<string | null>(null);
@@ -23,34 +51,32 @@ export default function RevenueCatProvider({ children }: PropsWithChildren) {
       Purchases.setLogLevel(logLevel);
       Purchases.configure({ apiKey });
 
-      // enableAdServicesIfResolved();
-
       const posthogUserId = posthog?.getDistinctId();
       if (posthogUserId) {
         Purchases.setAttributes({ $posthogUserId: posthogUserId });
       }
-
     } catch (error) {
       Sentry.captureException(error, {
         tags: { feature: 'revenuecat-init' },
       });
     }
 
-    const subscriptionListener = (customerInfo: CustomerInfo) => {
-      // const hasPremium = typeof customerInfo.entitlements.active[entitlement] !== "undefined";
-      // useSubscription.setState({ isPro: hasPremium });
+    Purchases.getCustomerInfo()
+      .then((info) => setSubscription(resolveEntitlements(info.entitlements.active)))
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+
+    const listener = (info: CustomerInfo) => {
+      setSubscription(resolveEntitlements(info.entitlements.active));
     };
 
-    Purchases.addCustomerInfoUpdateListener(subscriptionListener);
-
-    setIsLoading(false);
+    Purchases.addCustomerInfoUpdateListener(listener);
 
     return () => {
-      Purchases.removeCustomerInfoUpdateListener(subscriptionListener);
+      Purchases.removeCustomerInfoUpdateListener(listener);
     };
   }, []);
 
-  // Identify user when they sign in or change
   useEffect(() => {
     if (!apiKey || isLoading || !user) return;
 
@@ -58,14 +84,12 @@ export default function RevenueCatProvider({ children }: PropsWithChildren) {
       Purchases.logIn(user.id)
         .then(() => {
           lastIdentifiedUserId.current = user.id;
-          // Purchases.setAttributes({ $locale: locale });
         })
         .catch((error) => {
           Sentry.captureException(error, {
             tags: { feature: 'revenuecat', step: 'login' },
             extra: { userId: user.id },
           });
-          console.error('Error logging in to RevenueCat:', error);
         });
     }
   }, [user?.id, isLoading]);
@@ -74,5 +98,11 @@ export default function RevenueCatProvider({ children }: PropsWithChildren) {
     return null;
   }
 
-  return children;
+  return (
+    <SubscriptionContext.Provider
+      value={{ ...subscription, isLoading }}
+    >
+      {children}
+    </SubscriptionContext.Provider>
+  );
 }

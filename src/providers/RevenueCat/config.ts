@@ -21,5 +21,7 @@ export const apiKey =
 export const logLevel: LOG_LEVEL =
   process.env.EXPO_PUBLIC_REVENUECAT_LOG_LEVEL as LOG_LEVEL || Purchases.LOG_LEVEL.DEBUG;
 
-// export const entitlement =
-//   process.env.EXPO_PUBLIC_REVENUECAT_ENTITLEMENT || 'premium';
+export const entitlements = {
+  pro: 'pro',
+  plus: 'plus',
+} as const;
