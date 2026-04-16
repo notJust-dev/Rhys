@@ -22,6 +22,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         ...(config.plugins || []),
         ...plugins
     ],
-    slug: 'AIChat',
-    name: 'AIChat',
+    slug: 'rhys',
+    name: 'Rhys',
 })
