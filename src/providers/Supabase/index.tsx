@@ -1,5 +1,5 @@
 import { AuthProvider } from "./AuthProvider";
 
-export function SupabaseProvider({ children }: { children: React.ReactNode }) {
+export default function SupabaseProvider({ children }: { children: React.ReactNode }) {
   return <AuthProvider>{children}</AuthProvider>;
 }

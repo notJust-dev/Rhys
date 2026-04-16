@@ -2,8 +2,9 @@ import * as Sentry from "@sentry/react-native";
 import { MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import PostHogProvider from "./Posthog/PosthogProvider";
 import SentryProvider from "./Sentry/SentryProvider";
-import { SupabaseProvider } from "./Supabase";
+import SupabaseProvider from "./Supabase";
 
 const queryClient = new QueryClient({
   mutationCache: new MutationCache({
@@ -22,9 +23,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <SupabaseProvider>
           <SentryProvider>
-            <KeyboardProvider>
-              {children}
-            </KeyboardProvider>
+            <PostHogProvider>
+              <KeyboardProvider>
+                {children}
+              </KeyboardProvider>
+            </PostHogProvider>
           </SentryProvider>
         </SupabaseProvider>
       </QueryClientProvider>
