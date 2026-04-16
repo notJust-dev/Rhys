@@ -43,14 +43,6 @@
           }
         }
       ],
-      [
-        "@sentry/react-native",
-        {
-          "url": "https://sentry.io/",
-          "project": "<",
-          "organization": "<INSERT YOUR ORG>"
-        }
-      ]
     ],
     "experiments": {
       "typedRoutes": true,
