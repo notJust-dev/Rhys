@@ -1,4 +1,5 @@
 import { DEFAULT_MODEL, getModelById } from "@/constants/models";
+import * as Sentry from "@sentry/react-native";
 import { invokeFunctionStream } from "@/providers/Supabase/functions";
 import { useChatById, useCreateChat } from "@/services/chats";
 import { useChatMessages, useSaveMessage } from "@/services/messages";
@@ -144,7 +145,11 @@ export function ChatProvider({
             );
           }
         }
-      } catch {
+      } catch (error) {
+        Sentry.captureException(error, {
+          tags: { feature: "chat", step: "send_message" },
+          extra: { chatId },
+        });
         queryClient.setQueryData<MessagesInfiniteData>(
           ["messages", chatId],
           (old) => {

@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import { Session, User } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { AppState } from 'react-native';
@@ -65,13 +66,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         };
     }, []);
 
+    const captureAuthError = (error: unknown, step: string) => {
+        Sentry.captureException(error, {
+            tags: { feature: 'auth', step },
+        });
+    };
+
     const signInAnonymously = useCallback(async () => {
         const { error } = await supabase.auth.signInAnonymously();
         if (error) {
-            // Sentry.captureException(error, {
-            //     tags: { feature: 'auth', step: 'anonymous_sign_in' },
-            // });
-            console.error('Error signing in anonymously:', error);
+            captureAuthError(error, 'anonymous_sign_in');
             throw error;
         }
     }, []);
@@ -79,7 +83,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const signInWithEmail = useCallback(async (email: string, password: string) => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
-            console.error('Error signing in with email:', error);
+            captureAuthError(error, 'email_sign_in');
             throw error;
         }
     }, []);
@@ -87,7 +91,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const resetPasswordForEmail = useCallback(async (email: string) => {
         const { error } = await supabase.auth.resetPasswordForEmail(email);
         if (error) {
-            console.error('Error sending password reset email:', error);
+            captureAuthError(error, 'reset_password_email');
             throw error;
         }
     }, []);
@@ -100,7 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 type: 'recovery',
             });
             if (error) {
-                console.error('Error verifying password reset OTP:', error);
+                captureAuthError(error, 'verify_reset_otp');
                 throw error;
             }
         },
@@ -110,7 +114,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const updatePassword = useCallback(async (password: string) => {
         const { error } = await supabase.auth.updateUser({ password });
         if (error) {
-            console.error('Error updating password:', error);
+            captureAuthError(error, 'update_password');
             throw error;
         }
     }, []);
@@ -123,7 +127,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 type: 'signup',
             });
             if (error) {
-                console.error('Error verifying sign up OTP:', error);
+                captureAuthError(error, 'verify_signup_otp');
                 throw error;
             }
         },
@@ -133,7 +137,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const resendSignUpOtp = useCallback(async (email: string) => {
         const { error } = await supabase.auth.resend({ type: 'signup', email });
         if (error) {
-            console.error('Error resending sign up OTP:', error);
+            captureAuthError(error, 'resend_signup_otp');
             throw error;
         }
     }, []);
@@ -146,7 +150,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 options: name ? { data: { full_name: name } } : undefined,
             });
             if (error) {
-                console.error('Error signing up with email:', error);
+                captureAuthError(error, 'email_sign_up');
                 throw error;
             }
         },

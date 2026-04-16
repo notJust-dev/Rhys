@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react-native";
 import { fetch } from "expo/fetch";
 import { supabase } from "./client";
 import { supabasePublishableKey, supabaseUrl } from "./config";
@@ -23,7 +24,12 @@ export async function invokeFunctionStream(
   });
 
   if (!response.ok || !response.body) {
-    throw new Error(`Function "${name}" failed: ${response.status}`);
+    const error = new Error(`Function "${name}" failed: ${response.status}`);
+    Sentry.captureException(error, {
+      tags: { feature: "invoke_edge_function_stream", function_name: name },
+      extra: { status: response.status },
+    });
+    throw error;
   }
 
   return { reader: response.body.getReader(), headers: response.headers };
