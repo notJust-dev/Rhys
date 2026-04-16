@@ -1,6 +1,7 @@
 import { ControlledInput } from "@/components/form/ControlledInput";
+import Button from "@/components/ui/Button";
 import { useAuth } from "@/providers/Supabase/AuthProvider";
-import { Link, Pressable, Text, View } from "@/tw";
+import { Link, Text, View } from "@/tw";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -82,16 +83,12 @@ export default function SignUpScreen() {
 
           {error ? <Text className="text-sm text-red-600">{error}</Text> : null}
 
-          <Pressable
-            className="bg-black rounded-full px-8 py-4 mt-4 items-center"
+          <Button
+            title={isSubmitting ? "Creating account…" : "Sign up"}
             onPress={handleSubmit(onSubmit)}
             disabled={isSubmitting}
-            style={{ opacity: isSubmitting ? 0.5 : 1 }}
-          >
-            <Text className="text-white text-base font-semibold">
-              {isSubmitting ? "Creating account…" : "Sign up"}
-            </Text>
-          </Pressable>
+            className="mt-4"
+          />
 
           <View className="flex-row justify-center mt-4">
             <Text className="text-gray-500 text-sm">

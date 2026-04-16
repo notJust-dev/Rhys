@@ -1,4 +1,5 @@
 import { ControlledInput } from "@/components/form/ControlledInput";
+import Button from "@/components/ui/Button";
 import { useAuth } from "@/providers/Supabase/AuthProvider";
 import { Pressable, Text, View } from "@/tw";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -97,16 +98,12 @@ export default function VerifyEmailScreen() {
             <Text className="text-sm text-green-600">{resendStatus}</Text>
           ) : null}
 
-          <Pressable
-            className="bg-black rounded-full px-8 py-4 mt-4 items-center"
+          <Button
+            title={isSubmitting ? "Verifying…" : "Verify email"}
             onPress={handleSubmit(onSubmit)}
             disabled={isSubmitting}
-            style={{ opacity: isSubmitting ? 0.5 : 1 }}
-          >
-            <Text className="text-white text-base font-semibold">
-              {isSubmitting ? "Verifying…" : "Verify email"}
-            </Text>
-          </Pressable>
+            className="mt-4"
+          />
 
           <Pressable
             onPress={handleResend}

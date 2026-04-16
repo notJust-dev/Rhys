@@ -1,6 +1,7 @@
 import { ControlledInput } from "@/components/form/ControlledInput";
+import Button from "@/components/ui/Button";
 import { useAuth } from "@/providers/Supabase/AuthProvider";
-import { Pressable, Text, View } from "@/tw";
+import { Text, View } from "@/tw";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -69,16 +70,12 @@ export default function ForgotPasswordScreen() {
             <Text className="text-sm text-red-600">{error}</Text>
           ) : null}
 
-          <Pressable
-            className="bg-black rounded-full px-8 py-4 mt-4 items-center"
+          <Button
+            title={isSubmitting ? "Sending…" : "Send code"}
             onPress={handleSubmit(onSubmit)}
             disabled={isSubmitting}
-            style={{ opacity: isSubmitting ? 0.5 : 1 }}
-          >
-            <Text className="text-white text-base font-semibold">
-              {isSubmitting ? "Sending…" : "Send code"}
-            </Text>
-          </Pressable>
+            className="mt-4"
+          />
         </View>
       </KeyboardAwareScrollView>
     </FormProvider>

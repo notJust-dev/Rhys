@@ -1,6 +1,7 @@
 import { ControlledInput } from "@/components/form/ControlledInput";
+import Button from "@/components/ui/Button";
 import { useProfile, useUpdateProfile } from "@/services/profile";
-import { Pressable, Text, View } from "@/tw";
+import { Text, View } from "@/tw";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -50,14 +51,12 @@ export default function EditProfileScreen() {
           placeholder="Your name"
         />
 
-        <Pressable
+        <Button
+          title="Save"
           onPress={handleSubmit(onSubmit)}
           disabled={updateProfile.isPending}
-          className="bg-black rounded-full py-4 items-center mt-2"
-          style={{ opacity: updateProfile.isPending ? 0.5 : 1 }}
-        >
-          <Text className="text-white text-base font-semibold">Save</Text>
-        </Pressable>
+          className="mt-2"
+        />
       </View>
     </FormProvider>
   );
