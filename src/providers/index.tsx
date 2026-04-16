@@ -3,6 +3,7 @@ import { MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import PostHogProvider from "./Posthog/PosthogProvider";
+import RevenueCatProvider from "./RevenueCat/RevenueCatProvider";
 import SentryProvider from "./Sentry/SentryProvider";
 import SupabaseProvider from "./Supabase";
 
@@ -24,9 +25,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <SupabaseProvider>
           <SentryProvider>
             <PostHogProvider>
-              <KeyboardProvider>
-                {children}
-              </KeyboardProvider>
+              <RevenueCatProvider>
+                <KeyboardProvider>
+                  {children}
+                </KeyboardProvider>
+              </RevenueCatProvider>
             </PostHogProvider>
           </SentryProvider>
         </SupabaseProvider>

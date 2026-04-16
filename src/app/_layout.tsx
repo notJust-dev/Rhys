@@ -16,6 +16,8 @@ export function RootStack() {
       <Stack.Protected guard={isAuthenticated}>
         <Stack.Screen name="(protected)" options={{ headerShown: false }} />
       </Stack.Protected>
+
+      <Stack.Screen name="subscription-confirmation" options={{ headerShown: false }} />
     </Stack>
   );
 }
