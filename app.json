@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "AIChat",
-    "slug": "AIChat",
+    "name": "Rhys",
+    "slug": "rhys",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "aichat",
+    "scheme": "rhys",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.vadinsavin.AIChat",
+      "icon": "./assets/images/ios-light.png",
+      "bundleIdentifier": "app.notjust.rhys",
       "infoPlist": {
         "NSPhotoLibraryAddUsageDescription": "This app needs access to your photo library to save images."
       }
@@ -22,7 +22,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.vadinsavin.AIChat"
+      "package": "app.notjust.rhys"
     },
     "web": {
       "output": "static",
@@ -36,11 +36,13 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "android": {
-            "image": "./assets/images/splash-icon.png",
-            "imageWidth": 76
-          }
+          "backgroundColor": "#ffffff",
+          "image": "./assets/images/splash-icon-light.png",
+          "dark": {
+            "backgroundColor": "#000000",
+            "image": "./assets/images/splash-icon-dark.png"
+          },
+          "imageWidth": 200
         }
       ],
     ],
