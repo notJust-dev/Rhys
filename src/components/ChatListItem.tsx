@@ -1,3 +1,4 @@
+import { CustomEvents } from "@/providers/Posthog/events";
 import { useDeleteChat } from "@/services/chats";
 import { Text, View } from "@/tw";
 import type { Tables } from "@/types/database.types";
@@ -16,6 +17,7 @@ export function ChatListItem({ chat }: { chat: Tables<"chats"> }) {
   const handleDelete = () => {
     if (isActive) router.replace("/chat/new");
     deleteChat.mutate(chat.id);
+    CustomEvents.trackChatDeleted();
   };
 
   return (

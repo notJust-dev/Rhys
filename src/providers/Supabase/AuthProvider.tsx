@@ -1,3 +1,4 @@
+import { AuthEvents } from '@/providers/Posthog/events';
 import * as Sentry from '@sentry/react-native';
 import { Session, User } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
@@ -78,6 +79,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             captureAuthError(error, 'anonymous_sign_in');
             throw error;
         }
+        AuthEvents.trackSignIn({ method: 'anonymous' });
     }, []);
 
     const signInWithEmail = useCallback(async (email: string, password: string) => {
@@ -86,6 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             captureAuthError(error, 'email_sign_in');
             throw error;
         }
+        AuthEvents.trackSignIn({ method: 'email' });
     }, []);
 
     const resetPasswordForEmail = useCallback(async (email: string) => {
@@ -117,6 +120,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             captureAuthError(error, 'update_password');
             throw error;
         }
+        AuthEvents.trackPasswordResetCompleted();
     }, []);
 
     const verifySignUpOtp = useCallback(
@@ -130,6 +134,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 captureAuthError(error, 'verify_signup_otp');
                 throw error;
             }
+            AuthEvents.trackEmailVerified();
         },
         [],
     );
@@ -153,6 +158,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 captureAuthError(error, 'email_sign_up');
                 throw error;
             }
+            AuthEvents.trackSignUp();
         },
         [],
     );

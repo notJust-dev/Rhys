@@ -1,7 +1,8 @@
 import { posthog } from '../posthog';
+import * as AuthEvents from './auth';
 import * as CustomEvents from './custom';
 
-export { CustomEvents };
+export { AuthEvents, CustomEvents };
 
 /**
  * Analytics events for PostHog tracking

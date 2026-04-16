@@ -1,3 +1,4 @@
+import { CustomEvents } from "@/providers/Posthog/events";
 import { useChatContext } from "@/providers/ChatProvider";
 import { Pressable, ScrollView, Text, View } from "@/tw";
 
@@ -39,7 +40,10 @@ export function EmptyChat() {
           <Pressable
             key={starter.title}
             disabled={isLoading}
-            onPress={() => sendMessage(starter.prompt)}
+            onPress={() => {
+              CustomEvents.trackConversationStarterTapped({ title: starter.title });
+              sendMessage(starter.prompt);
+            }}
             className="px-4 py-3 rounded-2xl border border-gray-200 bg-white max-w-56"
           >
             <Text

@@ -1,4 +1,5 @@
-import { CHAT_MODELS } from "@/constants/models";
+import { CHAT_MODELS, getModelById } from "@/constants/models";
+import { CustomEvents } from "@/providers/Posthog/events";
 import { Pressable, Text, View } from "@/tw";
 import { SymbolView } from "expo-symbols";
 import { Modal } from "react-native";
@@ -43,6 +44,10 @@ export function ModelPickerModal({
                   disabled={readOnly}
                   onPress={() => {
                     onSelect(model.id);
+                    CustomEvents.trackModelSelected({
+                      model: model.id,
+                      provider: model.provider,
+                    });
                     onClose();
                   }}
                   className={`flex-row items-center p-3 rounded-xl ${isSelected ? "bg-gray-100" : ""

@@ -1,4 +1,5 @@
 import { DEFAULT_MODEL, getModelById } from "@/constants/models";
+import { CustomEvents } from "@/providers/Posthog/events";
 import * as Sentry from "@sentry/react-native";
 import { invokeFunctionStream } from "@/providers/Supabase/functions";
 import { useChatById, useCreateChat } from "@/services/chats";
@@ -80,6 +81,7 @@ export function ChatProvider({
 
       try {
         let currentChatId = chatId;
+        const isFirstMessage = !currentChatId;
         if (!currentChatId) {
           const pending = getModelById(pendingModel);
           const newChat = await createChat.mutateAsync({
@@ -91,12 +93,21 @@ export function ChatProvider({
           createdChatIdRef.current = currentChatId;
           setCreatedChatId(currentChatId);
           router.setParams({ id: currentChatId });
+          CustomEvents.trackChatCreated({
+            model: pending.id,
+            provider: pending.provider,
+          });
         }
 
         await saveMessage.mutateAsync({
           chatId: currentChatId,
           role: "user",
           content: text,
+        });
+
+        CustomEvents.trackMessageSent({
+          chatId: currentChatId,
+          isFirstMessage,
         });
 
         const chatMessages = [
