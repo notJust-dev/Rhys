@@ -1,8 +1,12 @@
 name: Create Production Builds
 
+defaults:
+  tools:
+    node: latest
+
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
 
 jobs:
   fingerprint:
@@ -12,7 +16,7 @@ jobs:
   # IOS CI/CD
   get_ios_build:
     name: Check for existing iOS build
-    needs: [fingerprint]
+    needs: [ fingerprint ]
     type: get-build
     params:
       fingerprint_hash: ${{ needs.fingerprint.outputs.ios_fingerprint_hash }}
@@ -21,7 +25,7 @@ jobs:
 
   build_ios:
     name: Build iOS
-    needs: [get_ios_build]
+    needs: [ get_ios_build ]
     if: ${{ !needs.get_ios_build.outputs.build_id }}
     type: build
     params:
@@ -30,7 +34,7 @@ jobs:
 
   submit_ios:
     name: Submit to App Store
-    needs: [build_ios]
+    needs: [ build_ios ]
     type: submit
     params:
       build_id: ${{ needs.build_ios.outputs.build_id }}
@@ -38,7 +42,7 @@ jobs:
 
   publish_ios_update:
     name: Publish iOS update
-    needs: [get_ios_build]
+    needs: [ get_ios_build ]
     if: ${{ needs.get_ios_build.outputs.build_id }}
     type: update
     params:
@@ -48,7 +52,7 @@ jobs:
   # Android CI/CD
   get_android_build:
     name: Check for existing Android build
-    needs: [fingerprint]
+    needs: [ fingerprint ]
     type: get-build
     params:
       fingerprint_hash: ${{ needs.fingerprint.outputs.android_fingerprint_hash }}
@@ -57,7 +61,7 @@ jobs:
 
   build_android:
     name: Build Android
-    needs: [get_android_build]
+    needs: [ get_android_build ]
     if: ${{ !needs.get_android_build.outputs.build_id }}
     type: build
     params:
@@ -66,7 +70,7 @@ jobs:
 
   submit_android:
     name: Submit to Play Store
-    needs: [build_android]
+    needs: [ build_android ]
     type: submit
     params:
       build_id: ${{ needs.build_android.outputs.build_id }}
@@ -74,7 +78,7 @@ jobs:
 
   publish_android_update:
     name: Publish Android update
-    needs: [get_android_build]
+    needs: [ get_android_build ]
     if: ${{ needs.get_android_build.outputs.build_id }}
     type: update
     params:
