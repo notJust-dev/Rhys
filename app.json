@@ -10,7 +10,9 @@
     "ios": {
       "icon": "./assets/images/ios-light.png",
       "bundleIdentifier": "app.notjust.rhys",
+      "supportsTablet": true,
       "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
         "NSPhotoLibraryAddUsageDescription": "This app needs access to your photo library to save images."
       }
     },
