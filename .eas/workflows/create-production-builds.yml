@@ -2,7 +2,7 @@ name: Create Production Builds
 
 defaults:
   tools:
-    node: lts
+    node: 24
 
 on:
   push:
